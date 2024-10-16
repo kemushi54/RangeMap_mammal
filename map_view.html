@@ -3,26 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Species Distribution Maps</title>
+    <title>SDM results for mammals</title>
     <style>
-        /* Basic styling for the iframe and dropdown */
+        /* Set the body and html height to 100% to allow percentage-based height */
+		html, body {
+			height: 100%;
+			margin: 0;
+		}
+		/* Basic styling for the iframe and dropdown */
         #map-container {
             position: relative;
-            height: 600px; /* Set your desired height */
+            height: 80%;
+			width: 100%;
         }
         iframe {
             width: 100%;
             height: 100%;
             border: none;
         }
+		/* Style the dropdown selector */
+		#map-select {
+			font-family: Arial, sans-serif; /* Change font */
+			font-size: 18px;               /* Adjust font size */
+			height: auto;                  /* Let height be flexible */
+            overflow-y: scroll;            /* Allow scrolling for dropdown */
+		}
+		/* Style the label */
+		label {
+		font-family: Arial;
+		}
     </style>
 </head>
 <body>
 
-    <h1>Species Distribution Maps</h1>
+    <h1>SDM Results for Mammals</h1>
     
-    <label for="map-select">Select Species Map:</label>
-    <select id="map-select" onchange="changeMap()">
+    <label for="map-select">Select Species:</label>
+    <select id="map-select" onchange="changeMap()" size=1>
 		<option value="sp_maps/sdm_results_短尾鼩.html">短尾鼩</option>
 		<option value="sp_maps/sdm_results_荷氏小麝鼩.html">荷氏小麝鼩</option>
 		<option value="sp_maps/sdm_results_臺灣長尾鼩.html">臺灣長尾鼩</option>
