@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDM results for mammals</title>
+    <title>SDM results of mammals</title>
     <style>
         /* Set the body and html height to 100% to allow percentage-based height */
 		html, body {
@@ -17,9 +17,11 @@
 			width: 100%;
         }
         iframe {
-            width: 100%;
+            width: 98%;
             height: 100%;
             border: none;
+			margin: 1%;
+			display: block;
         }
 		/* Style the dropdown selector */
 		#map-select {
@@ -36,7 +38,7 @@
 </head>
 <body>
 
-    <h1>SDM Results for Mammals</h1>
+    <h1>SDM Results of Mammals</h1>
     
     <label for="map-select">Select Species:</label>
     <select id="map-select" onchange="changeMap()" size=1>
