@@ -4,25 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SDM results of mammals</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
         /* Set the body and html height to 100% to allow percentage-based height */
 		html, body {
-			height: 100%;
-			margin: 0;
-		}
-		/* Basic styling for the iframe and dropdown */
-        #map-container {
-            position: relative;
-            height: 80%;
-			width: 100%;
-        }
-        iframe {
-            width: 98%;
-            height: 100%;
-            border: none;
+			height: 96%;
 			margin: 1%;
-			display: block;
-        }
+		}
+		
 		/* Style the dropdown selector */
 		#map-select {
 			font-family: Arial, sans-serif; /* Change font */
@@ -34,51 +24,128 @@
 		label {
 		font-family: Arial;
 		}
+		
+		/* Basic styling for the iframe and dropdown */
+        #map-container {
+            position: relative;
+            height: 90%;
+			width: 99%;
+			margin: 1%;
+        }
+		
+		#map {
+			position: relative;
+			width: 100%;  
+			height: 98%;
+			margin: 1%;
+			padding-bottom: 2px;
+			box-sizing: border-box;
+			object-fit: contain;
+			border: 1px solid #ccc;
+			border-radius: 10px;
+		}
+		
     </style>
 </head>
 <body>
 
     <h1>SDM Results of Mammals</h1>
     
-    <label for="map-select">Select Species:</label>
-    <select id="map-select" onchange="changeMap()" size=1>
-		<option value="sp_maps/sdm_results_短尾鼩.html">短尾鼩</option>
-		<option value="sp_maps/sdm_results_荷氏小麝鼩.html">荷氏小麝鼩</option>
-		<option value="sp_maps/sdm_results_臺灣長尾鼩.html">臺灣長尾鼩</option>
-		<option value="sp_maps/sdm_results_赤背條鼠.html">赤背條鼠</option>
-		<option value="sp_maps/sdm_results_臺灣森鼠.html">臺灣森鼠</option>
-		<option value="sp_maps/sdm_results_巢鼠.html">巢鼠</option>
-		<option value="sp_maps/sdm_results_家鼷鼠.html">家鼷鼠</option>
-		<option value="sp_maps/sdm_results_高山白腹鼠.html">高山白腹鼠</option>
-		<option value="sp_maps/sdm_results_黑腹絨鼠.html">黑腹絨鼠</option>
-		<option value="sp_maps/sdm_results_黃頸蝠.html">黃頸蝠</option>
-		<option value="sp_maps/sdm_results_東方寬耳蝠.html">東方寬耳蝠</option>
-		<option value="sp_maps/sdm_results_金芒管鼻蝠.html">金芒管鼻蝠</option>
-		<option value="sp_maps/sdm_results_玄彩蝠.html">玄彩蝠</option>
-		<option value="sp_maps/sdm_results_臺灣管鼻蝠.html">臺灣管鼻蝠</option>
-		<option value="sp_maps/sdm_results_長趾鼠耳蝠.html">長趾鼠耳蝠</option>
-		<option value="sp_maps/sdm_results_長尾鼠耳蝠.html">長尾鼠耳蝠</option>
-		<option value="sp_maps/sdm_results_赤黑鼠耳蝠.html">赤黑鼠耳蝠</option>
-		<option value="sp_maps/sdm_results_山家蝠.html">山家蝠</option>
-		<option value="sp_maps/sdm_results_臺灣長耳蝠.html">臺灣長耳蝠</option>
-		<option value="sp_maps/sdm_results_寬吻鼠耳蝠.html">寬吻鼠耳蝠</option>
-		<option value="sp_maps/sdm_results_堀川氏棕蝠.html">堀川氏棕蝠</option>
-		<option value="sp_maps/sdm_results_絨山蝠.html">絨山蝠</option>
-		<option value="sp_maps/sdm_results_東亞游離尾蝠.html">東亞游離尾蝠</option>
-		<option value="sp_maps/sdm_results_臺灣無尾葉鼻蝠.html">臺灣無尾葉鼻蝠</option>
-		<option value="sp_maps/sdm_results_黃喉貂.html">黃喉貂</option>
-    </select>
+    <label for="species-select">Select Species:</label>
+    <select id="species-select">
+		<option value="">-- 請選擇物種 --</option>
+	</select>
 
     <div id="map-container">
-        <iframe id="map-frame" src="sp_maps/sdm_results_短尾鼩.html"></iframe>
+        <div id="map"></div>
     </div>
 
     <script>
-        function changeMap() {
-            var select = document.getElementById("map-select");
-            var iframe = document.getElementById("map-frame");
-            iframe.src = select.value; // Update the iframe source
-        }
+        let speciesData = [];
+		let currentLayers = []; // Store active layers
+
+        // 讀取 CSV 檔案
+        function loadCSV() {
+        fetch('sp_table.csv')
+            .then(response => response.text())
+            .then(text => {
+                let rows = text.split("\n").map(row => row.trim()).filter(row => row);
+                speciesData = rows.slice(1).map(row => {
+                    let [mandarin, english] = row.split(",");
+                    return { mandarin, english };
+                });
+                populateSpeciesSelect();
+            })
+            .catch(error => console.error('Error loading CSV:', error));
+		}
+
+        // 產生 Species 選單
+        function populateSpeciesSelect() {
+        let speciesSelect = document.getElementById("species-select");
+        speciesData.forEach(({ mandarin, english }) => {
+            let option = document.createElement("option");
+            option.value = english; // Use English name as value
+            option.textContent = mandarin; // Display Mandarin name
+            speciesSelect.appendChild(option);
+        });
+		}
+		
+		loadCSV();
+		
+		
+		// Initialize the Leaflet map (without any layers)
+        var map = L.map('map').setView([23.5, 121], 7); // Center on Taiwan
+
+        // Define base layers
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        });
+
+        var satellite = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '&copy; Google Satellite'
+        });
+		
+		// Add default base layer
+        osm.addTo(map);
+
+		// Layer control for base maps
+        var baseMaps = {
+            "基本地圖": osm,
+            "衛星地圖": satellite
+        };
+
+        L.control.layers(baseMaps).addTo(map);
+		
+		// Add layer of species
+		document.getElementById("species-select").addEventListener("change", function () {
+			let selectedSpecies = this.value;
+			if (!selectedSpecies) return;
+			
+			// Remove existing layers before adding new ones
+			currentLayers.forEach(layer => map.removeLayer(layer));
+			currentLayers = []; // Clear the stored layers
+
+			let minGeoJSON = `range_map_ori/${selectedSpecies}.geojson`;
+			let maxGeoJSON = `range_map_modified/${selectedSpecies}.geojson`;
+
+			loadGeoJSON(minGeoJSON, '#ff4f1e');
+			loadGeoJSON(maxGeoJSON, '#0075e2');
+		});
+
+		function loadGeoJSON(url, color) {
+			fetch(url)
+            .then(response => response.json())
+			.then(data => {
+                let layer = L.geoJSON(data, { 
+                    style: { color: "transparent", weight: 0, fillColor: color, fillOpacity: 0.5 }
+                }).addTo(map);
+			
+				currentLayers.push(layer); // Store new layer
+
+            })
+            .catch(error => console.error('Error loading GeoJSON:', error));
+		}
     </script>
 
 </body>
